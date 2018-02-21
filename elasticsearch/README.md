@@ -21,8 +21,93 @@ GET <nom de votre index>/_count
 
 À vous de jouer ! Écrivez les requêtes ElasticSearch permettant de résoudre les problèmes posés.
 
+### Compter le nombre d'appels autour de Lansdale dans un rayon de 500 mètres
 ```
-TODO : ajouter les requêtes ElasticSearch ici
+GET 911/call/_count
+{
+  "query": {
+    "bool": {
+      "must": {
+        "match_all":{}
+      },
+      "filter": {
+          "geo_distance": {
+          "distance": "500m",
+          "location": [-75.283783, 40.241493]
+        }
+      }
+    }
+  }
+}
+```
+
+### Compter le nombre d'appels par catégorie
+```
+GET 911/_search
+{
+  "size": 0, 
+  "aggs": {
+    "category": {
+      "terms": {
+        "field": "type.keyword"
+      }
+    }
+  }
+}
+```
+
+### Trouver les 3 mois ayant comptabilisés le plus d'appels
+```
+GET 911/call/_search
+{
+  "size" : 0,
+  "aggs" : {
+    "calls" : {
+      "date_histogram" : {
+        "field" : "date",
+        "interval" : "month",
+        "order" : { "_count" : "desc" }
+      },
+      "aggs": {
+        "calls_bucket_sort": {
+          "bucket_sort": {
+            "size":3
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+### Trouver le top 3 des villes avec le plus d'appels pour overdose
+```
+GET 911/call/_search
+{
+  "size": 0, 
+  "query": {
+    "match": {
+      "title": "OVERDOSE"
+    }
+  }, 
+  "aggs": {
+    "calls": {
+      "terms": {
+        "field": "twp.keyword",
+        "order": {
+          "_count": "desc"
+        }
+      },
+      "aggs": {
+        "calls_bucket_sort": {
+          "bucket_sort": {
+            "size":3
+          }
+        }
+      }
+    }
+  }
+}
 ```
 
 ## Kibana
