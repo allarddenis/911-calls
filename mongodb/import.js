@@ -12,20 +12,21 @@ var insertCalls = function(db, callback) {
     fs.createReadStream('../911.csv')
         .pipe(csv())
         .on('data', data => {
-            var call = {
-                "location": {
-                    "lat": data.lat,
-                    "lon": data.lng
-                },
-                "desc": data.desc,
-                "zip": data.zip,
-                "title": data.title,
-                "timeStamp": data.timeStamp,
-                "twp": data.twp,
-                "addr": data.addr,
-                "e": data.e,
-            };
-            calls.push(call);
+            calls.push(
+                {
+                    location: {
+                        type: "Point",
+                        coordinates: [parseFloat(data.lng.trim()), parseFloat(data.lat.trim())]
+                    },
+                    desc: data.desc,
+                    zip: data.zip,
+                    title: data.title.substr(data.title.indexOf(':') + 1, data.title.length - 1).trim(),
+                    timeStamp: new Date(data.timeStamp),
+                    twp: data.twp,
+                    addr: data.addr,
+                    e: data.e,
+                }
+            );
         })
         .on('end', () => {
           collection.insertMany(calls, (err, result) => {

@@ -31,8 +31,67 @@ Afin de répondre aux différents problèmes, vous allez avoir besoin de créer 
 
 À vous de jouer ! Écrivez les requêtes MongoDB permettant de résoudre les problèmes posés.
 
+### 1 - Compter le nombre d'appels autour de Lansdale dans un rayon de 500 mètres
+
+```json
+db.calls.find({location:{ $near :{$geometry: { type: "Point",  coordinates: [ -75.283783, 40.241493 ] },$maxDistance: 500}}}).count()
 ```
-TODO : ajouter les requêtes MongoDB ici
+
+### 2 - Compter le nombre d'appels par catégorie
+
+```json
+db.calls.aggregate({ $group: { _id: "$category", count: { $sum: 1 } } })
+```
+
+### 3 - Trouver les 3 mois ayant comptabilisés le plus d'appels
+
+```json
+db.calls.aggregate([
+  {
+    $project: {
+      monthYear: {
+        $concat: [
+          {
+            $substr: [{$month: "$date"},0,2]
+          },
+          "/",
+          {
+            $substr: [{$year: "$date"},0,4]
+          }]}}
+  },
+  {
+    $group: {
+      _id: "$monthYear",
+      count: {
+        $sum: 1}}
+  },
+  {
+    $sort: {
+      count: -1}
+  },
+  {
+    $limit: 3
+  }
+])
+```
+
+### 4 - Trouver le top 3 des villes avec le plus d'appels pour overdose
+
+```json
+db.calls.aggregate([
+  {
+    $match: {
+      $text: {
+        $search : "OVERDOSE"}}
+  },
+  {
+    $group: {
+      _id: "$twp",
+      count: { $sum: 1 }}
+  },
+  { $sort: { count: -1 } },
+  { $limit : 3 }
+])
 ```
 
 Vous allez sûrement avoir besoin de vous inspirer des points suivants de la documentation :
