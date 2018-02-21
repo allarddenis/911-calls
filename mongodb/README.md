@@ -33,19 +33,19 @@ Afin de répondre aux différents problèmes, vous allez avoir besoin de créer 
 
 ### 1 - Compter le nombre d'appels autour de Lansdale dans un rayon de 500 mètres
 
-```json
+```
 db.calls.find({location:{ $near :{$geometry: { type: "Point",  coordinates: [ -75.283783, 40.241493 ] },$maxDistance: 500}}}).count()
 ```
 
 ### 2 - Compter le nombre d'appels par catégorie
 
-```json
+```
 db.calls.aggregate({ $group: { _id: "$category", count: { $sum: 1 } } })
 ```
 
 ### 3 - Trouver les 3 mois ayant comptabilisés le plus d'appels
 
-```json
+```
 db.calls.aggregate([
   {
     $project: {
@@ -77,7 +77,7 @@ db.calls.aggregate([
 
 ### 4 - Trouver le top 3 des villes avec le plus d'appels pour overdose
 
-```json
+```
 db.calls.aggregate([
   {
     $match: {
